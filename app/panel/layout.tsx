@@ -69,9 +69,10 @@ export default async function PanelLayout({ children }: { children: React.ReactN
     );
   }
 
-  // 2. Verify roles in Discord
-  let hasRole = false;
-  let isAdmin = false;
+  // 2. Verify roles in Discord (with fallback to DB)
+  let hasRole = userRecord.isMechanic || false;
+  let isAdmin = userRecord.isAdmin || false;
+  
   try {
     const res = await fetch(`https://discord.com/api/v10/guilds/${process.env.DISCORD_GUILD_ID}/members/${discordId}`, {
       headers: { Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}` },
@@ -90,13 +91,14 @@ export default async function PanelLayout({ children }: { children: React.ReactN
         await db.update(users).set({ isMechanic: hasRole, isAdmin, nickname: currentNickname }).where(eq(users.id, discordId));
         userRecord.nickname = currentNickname;
       }
+    } else {
+      console.warn(`Discord API returned ${res.status} when checking member roles`);
     }
   } catch (error) {
-    console.error("Error fetching discord member:", error);
-    hasRole = userRecord.isMechanic || false;
-    isAdmin = userRecord.isAdmin || false;
+    console.error("Error fetching discord member roles, using DB fallback:", error);
   }
 
+  // If no role at all, deny access
   if (!hasRole && !isAdmin) {
     return (
       <div className="flex min-h-screen items-center justify-center px-4">
