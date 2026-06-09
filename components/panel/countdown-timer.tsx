@@ -2,39 +2,64 @@
 
 import { useEffect, useState } from 'react';
 
-interface Props {
-  dailyTime: string | null; // e.g. '14:00'
-  title: string | null;
+interface Activity {
+  id?: string;
+  title: string;
+  dailyTime: string;
 }
 
-function getNextOccurrence(dailyTime: string): Date {
-  const [hours, minutes] = dailyTime.split(':').map(Number);
-  const now = new Date();
-  const target = new Date();
-  target.setHours(hours, minutes, 0, 0);
+interface Props {
+  activities: Activity[];
+}
 
-  // If the time already passed today, set it to tomorrow
-  if (target.getTime() <= now.getTime()) {
-    target.setDate(target.getDate() + 1);
+function getNextActivityAndDate(activities: Activity[]): { target: Date; title: string; dailyTime: string } | null {
+  if (!activities || activities.length === 0) return null;
+
+  const now = new Date();
+  
+  // Sort activities by dailyTime to ensure chronological order just in case
+  const sorted = [...activities].sort((a, b) => a.dailyTime.localeCompare(b.dailyTime));
+
+  for (const activity of sorted) {
+    const [hours, minutes] = activity.dailyTime.split(':').map(Number);
+    const target = new Date();
+    target.setHours(hours, minutes, 0, 0);
+
+    // If target + 60s is in the future, this is our next/current activity
+    if (target.getTime() + (60 * 1000) > now.getTime()) {
+      return { target, title: activity.title, dailyTime: activity.dailyTime };
+    }
   }
 
-  return target;
+  // If all activities for today have passed, the next one is the first activity tomorrow
+  const firstActivity = sorted[0];
+  const [hours, minutes] = firstActivity.dailyTime.split(':').map(Number);
+  const tomorrowTarget = new Date();
+  tomorrowTarget.setDate(tomorrowTarget.getDate() + 1);
+  tomorrowTarget.setHours(hours, minutes, 0, 0);
+  
+  return { target: tomorrowTarget, title: firstActivity.title, dailyTime: firstActivity.dailyTime };
 }
 
-export function CountdownTimer({ dailyTime, title }: Props) {
+export function CountdownTimer({ activities }: Props) {
   const [timeLeft, setTimeLeft] = useState({ hours: 0, minutes: 0, seconds: 0 });
   const [isNow, setIsNow] = useState(false);
+  const [currentInfo, setCurrentInfo] = useState<{ title: string; dailyTime: string } | null>(null);
 
   useEffect(() => {
-    if (!dailyTime) return;
+    if (!activities || activities.length === 0) return;
 
     const tick = () => {
-      const target = getNextOccurrence(dailyTime);
-      const now = Date.now();
-      const diff = target.getTime() - now;
+      const next = getNextActivityAndDate(activities);
+      if (!next) return;
 
-      // If within 60 seconds of the target, show "in progress"
-      if (diff <= 0) {
+      const now = Date.now();
+      const diff = next.target.getTime() - now;
+
+      setCurrentInfo({ title: next.title, dailyTime: next.dailyTime });
+
+      // If within 60 seconds past the target, show "in progress"
+      if (diff <= 0 && diff > -60000) {
         setIsNow(true);
         setTimeLeft({ hours: 0, minutes: 0, seconds: 0 });
         return;
@@ -51,11 +76,11 @@ export function CountdownTimer({ dailyTime, title }: Props) {
     tick();
     const interval = setInterval(tick, 1000);
     return () => clearInterval(interval);
-  }, [dailyTime]);
+  }, [activities]);
 
   const pad = (n: number) => n.toString().padStart(2, '0');
 
-  if (!dailyTime) {
+  if (!activities || activities.length === 0) {
     return (
       <>
         <div className="mt-5 flex items-baseline gap-1 font-heading">
@@ -82,7 +107,7 @@ export function CountdownTimer({ dailyTime, title }: Props) {
           <span className="text-5xl font-700 tabular-nums text-primary animate-pulse">00</span>
           <span className="text-lg text-muted-foreground">s</span>
         </div>
-        <p className="mt-3 text-xs font-semibold text-primary">¡Actividad en curso! — {title}</p>
+        <p className="mt-3 text-xs font-semibold text-primary">¡Actividad en curso! — {currentInfo?.title}</p>
       </>
     );
   }
@@ -98,8 +123,8 @@ export function CountdownTimer({ dailyTime, title }: Props) {
         <span className="text-lg text-muted-foreground">s</span>
       </div>
       <p className="mt-3 text-xs text-muted-foreground">
-        Próxima: <span className="font-semibold text-foreground">{title}</span>
-        <span className="ml-2 text-muted-foreground/60">· Todos los días a las {dailyTime}hs</span>
+        Próxima: <span className="font-semibold text-foreground">{currentInfo?.title}</span>
+        <span className="ml-2 text-muted-foreground/60">· Todos los días a las {currentInfo?.dailyTime}hs</span>
       </p>
     </>
   );

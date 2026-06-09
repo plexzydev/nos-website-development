@@ -14,7 +14,7 @@ export function Marquee({ text }: { text: string }) {
       gsap.to('[data-track]', {
         xPercent: -50,
         repeat: -1,
-        duration: 18,
+        duration: 35,
         ease: 'none',
       })
     }, el)

@@ -35,8 +35,8 @@ export default async function PanelDashboard() {
   });
   const [unreadCount] = await db.select({ value: count() }).from(notifications).where(and(eq(notifications.userId, discordId), eq(notifications.isRead, false)));
 
-  // Next scheduled activity (first active one)
-  const nextScheduled = await db.query.scheduledActivities.findFirst({
+  // All scheduled activities
+  const allScheduled = await db.query.scheduledActivities.findMany({
     where: eq(scheduledActivities.isActive, true),
     orderBy: [scheduledActivities.dailyTime],
   });
@@ -142,10 +142,7 @@ export default async function PanelDashboard() {
                 <p className="text-xs text-muted-foreground">Temporizador diario</p>
               </div>
             </div>
-            <CountdownTimer
-              dailyTime={nextScheduled?.dailyTime || null}
-              title={nextScheduled?.title || null}
-            />
+            <CountdownTimer activities={allScheduled} />
             <DiscordNotifToggle initialValue={userRecord?.discordNotifs ?? true} />
           </div>
         </div>
