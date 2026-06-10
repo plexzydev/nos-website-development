@@ -80,6 +80,35 @@ export const settings = pgTable('settings', {
   value: text('value'),
 });
 
+// ─── Forum ───────────────────────────────────────────────────────────
+export const forumThreads = pgTable('forum_threads', {
+  id: text('id').primaryKey(),
+  authorId: text('author_id').references(() => users.id).notNull(),
+  title: text('title').notNull(),
+  content: text('content').notNull(),
+  mediaUrl: text('media_url'),
+  upvotes: integer('upvotes').default(0).notNull(),
+  downvotes: integer('downvotes').default(0).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export const forumComments = pgTable('forum_comments', {
+  id: text('id').primaryKey(),
+  threadId: text('thread_id').references(() => forumThreads.id, { onDelete: 'cascade' }).notNull(),
+  authorId: text('author_id').references(() => users.id).notNull(),
+  content: text('content').notNull(),
+  mediaUrl: text('media_url'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export const forumVotes = pgTable('forum_votes', {
+  id: text('id').primaryKey(),
+  threadId: text('thread_id').references(() => forumThreads.id, { onDelete: 'cascade' }).notNull(),
+  voterId: text('voter_id').notNull(), // UUID stored in cookie
+  vote: integer('vote').notNull(), // 1 for up, -1 for down
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
 // ═══ Relations ═══════════════════════════════════════════════════════
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -138,5 +167,32 @@ export const notificationsRelations = relations(notifications, ({ one }) => ({
   user: one(users, {
     fields: [notifications.userId],
     references: [users.id],
+  }),
+}));
+
+export const forumThreadsRelations = relations(forumThreads, ({ one, many }) => ({
+  author: one(users, {
+    fields: [forumThreads.authorId],
+    references: [users.id],
+  }),
+  comments: many(forumComments),
+  votes: many(forumVotes),
+}));
+
+export const forumCommentsRelations = relations(forumComments, ({ one }) => ({
+  thread: one(forumThreads, {
+    fields: [forumComments.threadId],
+    references: [forumThreads.id],
+  }),
+  author: one(users, {
+    fields: [forumComments.authorId],
+    references: [users.id],
+  }),
+}));
+
+export const forumVotesRelations = relations(forumVotes, ({ one }) => ({
+  thread: one(forumThreads, {
+    fields: [forumVotes.threadId],
+    references: [forumThreads.id],
   }),
 }));

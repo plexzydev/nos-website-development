@@ -1,6 +1,7 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { Oswald, Inter } from 'next/font/google'
+import { Toaster } from 'sonner'
 import './globals.css'
 
 const inter = Inter({
@@ -41,6 +42,7 @@ export default function RootLayout({
     >
       <body className="font-sans antialiased" suppressHydrationWarning>
         {children}
+        <Toaster theme="dark" richColors />
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>

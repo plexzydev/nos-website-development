@@ -12,6 +12,7 @@ const LINKS = [
   { href: '/nosotros', label: 'Nosotros' },
   { href: '/equipo', label: 'Equipo' },
   { href: '/informacion', label: 'Más información' },
+  { href: '/foro', label: 'Foro' },
   { href: '/terminos', label: 'TyC' },
 ]
 
