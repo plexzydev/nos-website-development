@@ -29,7 +29,7 @@ export function PageHero({
 
     const ctx = gsap.context(() => {
       gsap.from('[data-hero-car]', {
-        x: 300,
+        x: -300,
         opacity: 0,
         duration: 1.5,
         ease: 'power3.out',
