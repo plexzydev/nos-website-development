@@ -103,7 +103,7 @@ export default async function PanelDashboard() {
 
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="group relative overflow-hidden rounded-2xl border border-border bg-card p-5 transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5">
-            <img src="/flecha-azul.png" alt="" className="absolute right-4 top-4 size-16 object-contain opacity-40 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12" />
+            <img src="/flecha-azul.png" alt="" className="absolute -right-2 -top-2 w-28 h-28 object-contain opacity-40 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12" />
             <div className="relative">
               <div className="flex size-11 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400 ring-1 ring-blue-500/20 transition-transform group-hover:scale-110"><Wrench className="size-5" /></div>
               <p className="mt-4 font-heading text-4xl font-700 tracking-tight">{repairCount.value}</p>
@@ -111,7 +111,7 @@ export default async function PanelDashboard() {
             </div>
           </div>
           <div className="group relative overflow-hidden rounded-2xl border border-border bg-card p-5 transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5">
-            <img src="/flecha-amarillo.png" alt="" className="absolute right-4 top-4 size-16 object-contain opacity-40 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12" />
+            <img src="/flecha-amarillo.png" alt="" className="absolute -right-2 -top-2 w-28 h-28 object-contain opacity-40 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12" />
             <div className="relative">
               <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/20 transition-transform group-hover:scale-110"><Gauge className="size-5" /></div>
               <p className="mt-4 font-heading text-4xl font-700 tracking-tight">{tuningCount.value}</p>
@@ -119,7 +119,7 @@ export default async function PanelDashboard() {
             </div>
           </div>
           <div className="group relative overflow-hidden rounded-2xl border border-border bg-card p-5 transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5">
-            <img src="/flecha-verde.png" alt="" className="absolute right-4 top-4 size-16 object-contain opacity-40 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12" />
+            <img src="/flecha-verde.png" alt="" className="absolute -right-2 -top-2 w-28 h-28 object-contain opacity-40 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12" />
             <div className="relative">
               <div className="flex size-11 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20 transition-transform group-hover:scale-110"><Activity className="size-5" /></div>
               <p className="mt-4 font-heading text-4xl font-700 tracking-tight">{maintenanceCount.value}</p>
