@@ -16,14 +16,11 @@ async function verifyAdmin() {
 
   const discordId = session.user.id;
 
-  const res = await fetch(`https://discord.com/api/v10/guilds/${process.env.DISCORD_GUILD_ID}/members/${discordId}`, {
-    headers: { Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}` },
-    next: { revalidate: 0 }
+  const userRecord = await db.query.users.findFirst({
+    where: eq(users.id, discordId)
   });
 
-  if (!res.ok) throw new Error('No se pudo verificar tu rol');
-  const member = await res.json();
-  if (!member.roles.includes(ADMIN_ROLE_ID)) throw new Error('No sos admin');
+  if (!userRecord?.isAdmin) throw new Error('No sos admin');
 
   return discordId;
 }

@@ -13,17 +13,10 @@ export default async function AdminPage() {
   const session = await auth();
   const discordId = session!.user!.id!;
 
-  let isAdmin = false;
-  try {
-    const res = await fetch(`https://discord.com/api/v10/guilds/${process.env.DISCORD_GUILD_ID}/members/${discordId}`, {
-      headers: { Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}` },
-      next: { revalidate: 0 }
-    });
-    if (res.ok) {
-      const member = await res.json();
-      isAdmin = member.roles.includes(ADMIN_ROLE_ID);
-    }
-  } catch {}
+  const userRecord = await db.query.users.findFirst({
+    where: eq(users.id, discordId)
+  });
+  const isAdmin = userRecord?.isAdmin || false;
 
   if (!isAdmin) {
     return (
