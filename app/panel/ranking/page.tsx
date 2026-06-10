@@ -1,9 +1,11 @@
 import { auth } from '@/auth';
 import { db } from '@/lib/db';
 import { users, activities, settings } from '@/lib/db/schema';
-import { eq, desc, sql } from 'drizzle-orm';
+import { eq, desc, sql, gte } from 'drizzle-orm';
 import { Trophy, Wrench, Gauge, Activity, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { getCurrentRankingPeriod } from '@/lib/ranking-period';
+import { RankingCountdown } from '@/components/panel/ranking-countdown';
 
 export default async function RankingPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
   const session = await auth();
@@ -16,15 +18,22 @@ export default async function RankingPage({ searchParams }: { searchParams: Prom
   const reward3 = allSettings.find((s) => s.key === 'reward_3')?.value || '';
 
   const allMechanics = await db.select().from(users).where(eq(users.isMechanic, true));
-  
-  // Aggregate activities per mechanic based on tab
+
+  // Get current ranking period
+  const period = await getCurrentRankingPeriod();
+  const periodFilter = gte(activities.createdAt, period.start);
+
+  // Aggregate activities per mechanic based on tab, filtered by current period
   const stats = await db
     .select({
       mechanicId: activities.mechanicId,
       count: sql<number>`cast(count(${activities.id}) as int)`
     })
     .from(activities)
-    .where(currentTab !== 'total' ? eq(activities.type, currentTab) : undefined)
+    .where(currentTab !== 'total'
+      ? sql`${activities.type} = ${currentTab} AND ${activities.createdAt} >= ${period.start.toISOString()}`
+      : periodFilter
+    )
     .groupBy(activities.mechanicId)
     .orderBy(desc(sql`count(${activities.id})`));
 
@@ -51,14 +60,17 @@ export default async function RankingPage({ searchParams }: { searchParams: Prom
   return (
     <div className="pt-4 max-w-4xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <Link href="/panel" className="flex size-10 items-center justify-center rounded-xl border border-border transition-colors hover:bg-secondary">
-          <ArrowLeft className="size-4" />
-        </Link>
-        <div>
-          <h1 className="font-heading text-2xl font-700 uppercase tracking-tight">Ranking de Mecánicos</h1>
-          <p className="text-xs text-muted-foreground">Tabla de posiciones según trabajos realizados</p>
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <Link href="/panel" className="flex size-10 items-center justify-center rounded-xl border border-border transition-colors hover:bg-secondary">
+            <ArrowLeft className="size-4" />
+          </Link>
+          <div>
+            <h1 className="font-heading text-2xl font-700 uppercase tracking-tight">Ranking de Mecánicos</h1>
+            <p className="text-xs text-muted-foreground">Tabla de posiciones según trabajos realizados</p>
+          </div>
         </div>
+        <RankingCountdown endDateISO={period.end.toISOString()} />
       </div>
 
       {/* Tabs */}

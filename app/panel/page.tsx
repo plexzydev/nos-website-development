@@ -1,11 +1,12 @@
 import { auth } from '@/auth';
 import { db } from '@/lib/db';
 import { activities, users, warnings, notifications, scheduledActivities } from '@/lib/db/schema';
-import { eq, desc, count, and } from 'drizzle-orm';
-import { Wrench, Gauge, Clock, AlertTriangle, Bell, Activity, Plus, ChevronRight, Skull } from 'lucide-react';
+import { eq, desc, count, and, gte } from 'drizzle-orm';
+import { Wrench, Gauge, Clock, AlertTriangle, Bell, Activity, Plus, ChevronRight, Skull, TrendingUp, TrendingDown } from 'lucide-react';
 import Link from 'next/link';
 import { CountdownTimer } from '@/components/panel/countdown-timer';
 import { DiscordNotifToggle } from '@/components/panel/discord-notif-toggle';
+import { getCurrentRankingPeriod } from '@/lib/ranking-period';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,10 +16,14 @@ export default async function PanelDashboard() {
 
   const userRecord = await db.query.users.findFirst({ where: eq(users.id, discordId) });
 
-  const [repairCount] = await db.select({ value: count() }).from(activities).where(and(eq(activities.mechanicId, discordId), eq(activities.type, 'repair')));
-  const [tuningCount] = await db.select({ value: count() }).from(activities).where(and(eq(activities.mechanicId, discordId), eq(activities.type, 'tuning')));
-  const [maintenanceCount] = await db.select({ value: count() }).from(activities).where(and(eq(activities.mechanicId, discordId), eq(activities.type, 'maintenance')));
-  const [totalCount] = await db.select({ value: count() }).from(activities).where(eq(activities.mechanicId, discordId));
+  // Get current 14-day ranking period
+  const period = await getCurrentRankingPeriod();
+  const periodFilter = gte(activities.createdAt, period.start);
+
+  const [repairCount] = await db.select({ value: count() }).from(activities).where(and(eq(activities.mechanicId, discordId), eq(activities.type, 'repair'), periodFilter));
+  const [tuningCount] = await db.select({ value: count() }).from(activities).where(and(eq(activities.mechanicId, discordId), eq(activities.type, 'tuning'), periodFilter));
+  const [maintenanceCount] = await db.select({ value: count() }).from(activities).where(and(eq(activities.mechanicId, discordId), eq(activities.type, 'maintenance'), periodFilter));
+  const [totalCount] = await db.select({ value: count() }).from(activities).where(and(eq(activities.mechanicId, discordId), periodFilter));
   const [warningCount] = await db.select({ value: count() }).from(warnings).where(eq(warnings.mechanicId, discordId));
 
   const userWarnings = await db.query.warnings.findMany({
@@ -89,7 +94,14 @@ export default async function PanelDashboard() {
             </div>
             <div className="mt-6 grid grid-cols-2 gap-3">
               <div className="rounded-xl bg-secondary/50 p-3 text-center">
-                <p className="font-heading text-2xl font-700 text-primary">{totalCount.value}</p>
+                <div className="flex items-center justify-center gap-1.5">
+                  <p className="font-heading text-2xl font-700 text-primary">{totalCount.value}</p>
+                  {totalCount.value >= 10 ? (
+                    <TrendingUp className="size-5 text-emerald-400" />
+                  ) : (
+                    <TrendingDown className="size-5 text-red-400" />
+                  )}
+                </div>
                 <p className="mt-0.5 text-[10px] uppercase tracking-widest text-muted-foreground">Total Trabajos</p>
               </div>
               <div className="rounded-xl bg-secondary/50 p-3 text-center">
