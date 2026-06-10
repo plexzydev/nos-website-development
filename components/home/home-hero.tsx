@@ -25,6 +25,7 @@ export function HomeHero() {
         .from('[data-h-sub]', { y: 30, opacity: 0, duration: 0.8 }, '-=0.5')
         .from('[data-h-cta]', { y: 20, opacity: 0, duration: 0.6, stagger: 0.1 }, '-=0.4')
         .from('[data-h-stat]', { y: 24, opacity: 0, duration: 0.6, stagger: 0.1 }, '-=0.3')
+        .from('[data-hero-car]', { x: 300, opacity: 0, duration: 1.5, ease: 'power3.out' }, '-=1')
 
       // Parallax on hero image
       gsap.to('[data-h-img]', {
@@ -63,7 +64,7 @@ export function HomeHero() {
 
       {/* Diagonal Cut Effect + Car Image */}
       <div className="pointer-events-none absolute right-[-10%] top-1/2 hidden h-[140%] w-[40%] -translate-y-1/2 -skew-x-12 overflow-hidden bg-primary/[0.04] md:block z-0 xl:right-[-5%] xl:w-[35%]">
-        <div className="absolute left-[-35%] top-[70%] w-[150%] -translate-y-1/2 skew-x-12 select-none xl:left-[-25%] xl:w-[130%]">
+        <div data-hero-car className="absolute left-[-55%] top-[70%] w-[170%] -translate-y-1/2 skew-x-12 select-none xl:left-[-40%] xl:w-[150%]">
           <Image
             src="/skyline.png"
             alt="Nissan Skyline GTR Amarillo NOS"
