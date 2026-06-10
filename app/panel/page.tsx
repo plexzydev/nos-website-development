@@ -103,25 +103,31 @@ export default async function PanelDashboard() {
 
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="group relative overflow-hidden rounded-2xl border border-border bg-card p-5 transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5">
-            <div className="absolute right-0 top-0 size-24 -translate-y-4 translate-x-4 rounded-full bg-blue-500/5" />
+            <img src="/flecha-azul.png" alt="" className="absolute right-0 top-0 size-24 -translate-y-2 translate-x-2 opacity-5 object-contain transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12" />
             <div className="relative">
-              <div className="flex size-11 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400 ring-1 ring-blue-500/20 transition-transform group-hover:scale-110"><Wrench className="size-5" /></div>
+              <div className="flex size-11 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400 ring-1 ring-blue-500/20 transition-transform group-hover:scale-110">
+                <img src="/flecha-azul.png" alt="Reparaciones" className="size-6 object-contain" />
+              </div>
               <p className="mt-4 font-heading text-4xl font-700 tracking-tight">{repairCount.value}</p>
               <p className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">Reparaciones</p>
             </div>
           </div>
           <div className="group relative overflow-hidden rounded-2xl border border-border bg-card p-5 transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5">
-            <div className="absolute right-0 top-0 size-24 -translate-y-4 translate-x-4 rounded-full bg-primary/5" />
+            <img src="/flecha-amarillo.png" alt="" className="absolute right-0 top-0 size-24 -translate-y-2 translate-x-2 opacity-5 object-contain transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12" />
             <div className="relative">
-              <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/20 transition-transform group-hover:scale-110"><Gauge className="size-5" /></div>
+              <div className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/20 transition-transform group-hover:scale-110">
+                <img src="/flecha-amarillo.png" alt="Tuning" className="size-6 object-contain" />
+              </div>
               <p className="mt-4 font-heading text-4xl font-700 tracking-tight">{tuningCount.value}</p>
               <p className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">Tuning</p>
             </div>
           </div>
           <div className="group relative overflow-hidden rounded-2xl border border-border bg-card p-5 transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5">
-            <div className="absolute right-0 top-0 size-24 -translate-y-4 translate-x-4 rounded-full bg-emerald-500/5" />
+            <img src="/flecha-verde.png" alt="" className="absolute right-0 top-0 size-24 -translate-y-2 translate-x-2 opacity-5 object-contain transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12" />
             <div className="relative">
-              <div className="flex size-11 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20 transition-transform group-hover:scale-110"><Activity className="size-5" /></div>
+              <div className="flex size-11 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20 transition-transform group-hover:scale-110">
+                <img src="/flecha-verde.png" alt="Actividades" className="size-6 object-contain" />
+              </div>
               <p className="mt-4 font-heading text-4xl font-700 tracking-tight">{maintenanceCount.value}</p>
               <p className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">Actividades</p>
             </div>
