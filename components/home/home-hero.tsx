@@ -27,7 +27,6 @@ export function HomeHero() {
         .from('[data-h-stat]', { y: 24, opacity: 0, duration: 0.6, stagger: 0.1 }, '-=0.3')
         .from('[data-hero-car]', { x: -300, opacity: 0, duration: 1.5, ease: 'power3.out' }, '-=1')
 
-      })
     }, el)
 
     return () => ctx.revert()
