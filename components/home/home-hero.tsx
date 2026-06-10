@@ -62,17 +62,17 @@ export function HomeHero() {
       </div>
 
       {/* Diagonal Cut Effect + Car Image */}
-      <div className="pointer-events-none absolute -right-24 top-1/2 hidden h-[140%] w-[40%] -translate-y-1/2 -skew-x-12 bg-primary/[0.04] md:block" />
-      
-      <div className="pointer-events-none absolute right-[-10%] top-[40%] hidden w-[60%] -translate-y-1/2 select-none md:block xl:right-[0%] xl:w-[50%] z-0">
-        <Image
-          src="/skyline.png"
-          alt="Nissan Skyline GTR Amarillo NOS"
-          width={1200}
-          height={600}
-          className="h-auto w-full object-contain drop-shadow-2xl"
-          priority
-        />
+      <div className="pointer-events-none absolute -right-16 top-1/2 hidden h-[140%] w-[45%] -translate-y-1/2 -skew-x-12 overflow-hidden bg-primary/[0.04] md:block z-0">
+        <div className="absolute left-[-20%] top-[70%] w-[140%] -translate-y-1/2 skew-x-12 select-none xl:left-[-10%] xl:w-[120%]">
+          <Image
+            src="/skyline.png"
+            alt="Nissan Skyline GTR Amarillo NOS"
+            width={1200}
+            height={600}
+            className="h-auto w-full object-contain drop-shadow-2xl"
+            priority
+          />
+        </div>
       </div>
 
       <div className="relative z-10 mx-auto w-full max-w-5xl px-6 pt-28">
