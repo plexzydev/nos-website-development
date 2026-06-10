@@ -27,16 +27,6 @@ export function HomeHero() {
         .from('[data-h-stat]', { y: 24, opacity: 0, duration: 0.6, stagger: 0.1 }, '-=0.3')
         .from('[data-hero-car]', { x: -300, opacity: 0, duration: 1.5, ease: 'power3.out' }, '-=1')
 
-      // Parallax on hero image
-      gsap.to('[data-h-img]', {
-        yPercent: 18,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: el,
-          start: 'top top',
-          end: 'bottom top',
-          scrub: true,
-        },
       })
     }, el)
 
@@ -48,16 +38,7 @@ export function HomeHero() {
       ref={root}
       className="js-reveal relative flex min-h-screen items-center overflow-hidden"
     >
-      <div className="absolute inset-0 -z-10">
-        <div data-h-img className="absolute inset-0 scale-110">
-          <Image
-            src="/hero-garage.png"
-            alt="Taller NOS en Del Perro Beach"
-            fill
-            priority
-            className="object-cover"
-          />
-        </div>
+      <div className="absolute inset-0 -z-10 bg-background">
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-background/40" />
         <div className="absolute inset-0 bg-grid opacity-60" />
       </div>

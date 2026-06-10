@@ -95,13 +95,13 @@ export function LoadingScreen() {
       {/* Left Curtain */}
       <div 
         ref={leftCurtainRef} 
-        className="absolute left-0 top-0 bottom-0 w-1/2 bg-[#FFD700] origin-left pointer-events-auto border-r border-[#E6C200]"
+        className="absolute left-0 top-0 bottom-0 w-1/2 bg-[#FFD700] origin-left pointer-events-auto"
       />
       
       {/* Right Curtain */}
       <div 
         ref={rightCurtainRef} 
-        className="absolute right-0 top-0 bottom-0 w-1/2 bg-[#FFD700] origin-right pointer-events-auto border-l border-[#E6C200]"
+        className="absolute right-0 top-0 bottom-0 w-1/2 bg-[#FFD700] origin-right pointer-events-auto"
       />
 
       {/* Content overlay (centered) */}
