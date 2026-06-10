@@ -17,7 +17,7 @@ export default async function AdminPage() {
   try {
     const res = await fetch(`https://discord.com/api/v10/guilds/${process.env.DISCORD_GUILD_ID}/members/${discordId}`, {
       headers: { Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}` },
-      next: { revalidate: 60 }
+      next: { revalidate: 0 }
     });
     if (res.ok) {
       const member = await res.json();
