@@ -3,9 +3,9 @@ import { forumThreads, users, forumComments } from '@/lib/db/schema';
 import { desc, eq, count } from 'drizzle-orm';
 import { ThreadCard } from '@/components/foro/thread-card';
 import Link from 'next/link';
-import { Plus } from 'lucide-react';
-import { auth } from '@/auth';
+import { CreateThreadModal } from '@/components/foro/create-thread-modal';
 import { PageHero } from '@/components/page-hero';
+import { auth } from '@/auth';
 
 export const metadata = {
   title: 'Foro NOS | Nitrous Oxide System',
@@ -54,16 +54,12 @@ export default async function ForoPage() {
           </>
         }
         description="Mirá los aportes de los mecánicos, participá en las discusiones y votá tus favoritos."
+        heroImage={{
+          src: '/skyline.png',
+          alt: 'Nissan Skyline GTR Amarillo NOS'
+        }}
       >
-        {isMechanic && (
-          <Link
-            href="/panel/foro/nuevo"
-            className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 font-heading text-sm font-600 uppercase tracking-wider text-primary-foreground transition-transform hover:scale-[1.03] active:scale-95"
-          >
-            <Plus className="size-4" />
-            Crear Hilo
-          </Link>
-        )}
+        {isMechanic && <CreateThreadModal />}
       </PageHero>
 
       <div className="mx-auto max-w-5xl px-6 py-16">
