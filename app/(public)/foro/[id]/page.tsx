@@ -14,8 +14,9 @@ import { unstable_noStore as noStore } from 'next/cache';
 
 export const dynamic = 'force-dynamic';
 
-export default async function ThreadDetailPage({ params }: { params: { id: string } }) {
+export default async function ThreadDetailPage({ params }: { params: Promise<{ id: string }> }) {
   noStore();
+  const { id } = await params;
   const session = await auth();
   let isMechanic = false;
 
@@ -33,26 +34,11 @@ export default async function ThreadDetailPage({ params }: { params: { id: strin
     })
     .from(forumThreads)
     .innerJoin(users, eq(forumThreads.authorId, users.id))
-    .where(eq(forumThreads.id, params.id))
+    .where(eq(forumThreads.id, id))
     .limit(1);
 
   if (!threadRecord.length) {
-    return (
-      <div className="pt-32 pb-16 px-6 text-center max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold mb-4">Error: Hilo no encontrado en la base de datos</h1>
-        <p className="text-muted-foreground mb-4">
-          La consulta a la base de datos no arrojó resultados.
-        </p>
-        <div className="bg-secondary p-4 rounded text-left font-mono text-sm">
-          <p>ID buscado: {params.id}</p>
-          <p>Longitud de resultados: {threadRecord.length}</p>
-          <p>Esto puede deberse a que el hilo no existe, el caché de Vercel está sirviendo datos antiguos, o el autor fue borrado.</p>
-        </div>
-        <Link href="/foro" className="mt-8 inline-block px-6 py-2 bg-primary text-primary-foreground rounded-full font-bold">
-          Volver al Foro
-        </Link>
-      </div>
-    );
+    notFound();
   }
 
   const { thread, author } = threadRecord[0];
