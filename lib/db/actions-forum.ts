@@ -3,11 +3,25 @@
 import { auth } from '@/auth';
 import { db } from '@/lib/db';
 import { forumThreads, forumComments, forumVotes, users } from '@/lib/db/schema';
-import { eq, and, sql } from 'drizzle-orm';
+import { eq, and, sql, desc } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { randomUUID } from 'crypto';
 import { cookies } from 'next/headers';
+
+import { z } from 'zod';
+
+const threadSchema = z.object({
+  title: z.string().min(3, "El título es muy corto").max(100, "El título no puede superar los 100 caracteres"),
+  content: z.string().min(5, "El contenido es muy corto").max(5000, "El contenido es demasiado largo"),
+  mediaUrl: z.string().url("URL de imagen no válida").or(z.literal('')).nullable().optional(),
+});
+
+const commentSchema = z.object({
+  threadId: z.string().uuid("ID de hilo no válido"),
+  content: z.string().min(2, "El comentario es muy corto").max(2000, "El comentario es demasiado largo"),
+  mediaUrl: z.string().url("URL de imagen no válida").or(z.literal('')).nullable().optional(),
+});
 
 export async function createForumThread(formData: FormData) {
   const session = await auth();
@@ -15,15 +29,32 @@ export async function createForumThread(formData: FormData) {
   if (!discordId) throw new Error('No autorizado');
 
   const userRecord = await db.query.users.findFirst({ where: eq(users.id, discordId) });
-  if (!userRecord || !userRecord.isMechanic) throw new Error('Sólo mecánicos pueden crear hilos');
-
-  const title = formData.get('title') as string;
-  const content = formData.get('content') as string;
-  const mediaUrl = formData.get('mediaUrl') as string;
-
-  if (!title || !content) {
-    throw new Error('Faltan campos obligatorios');
+  if (!userRecord || (!userRecord.isMechanic && !userRecord.isAdmin)) {
+    throw new Error('Sólo mecánicos o administradores pueden crear hilos');
   }
+
+  // Rate Limiting Básico (Evitar Spam)
+  const lastThread = await db.query.forumThreads.findFirst({
+    where: eq(forumThreads.authorId, discordId),
+    orderBy: [desc(forumThreads.createdAt)],
+  });
+
+  if (lastThread && (Date.now() - lastThread.createdAt.getTime()) < 30000) {
+    throw new Error('Estás publicando muy rápido. Esperá 30 segundos.');
+  }
+
+  // Validación Zod
+  const parsed = threadSchema.safeParse({
+    title: formData.get('title'),
+    content: formData.get('content'),
+    mediaUrl: formData.get('mediaUrl'),
+  });
+
+  if (!parsed.success) {
+    throw new Error(parsed.error.errors[0].message);
+  }
+
+  const { title, content, mediaUrl } = parsed.data;
 
   const newId = randomUUID();
 
@@ -45,25 +76,45 @@ export async function createForumComment(formData: FormData) {
   if (!discordId) throw new Error('No autorizado');
 
   const userRecord = await db.query.users.findFirst({ where: eq(users.id, discordId) });
-  if (!userRecord || !userRecord.isMechanic) throw new Error('Sólo mecánicos pueden comentar');
-
-  const threadId = formData.get('threadId') as string;
-  const content = formData.get('content') as string;
-  const mediaUrl = formData.get('mediaUrl') as string;
-
-  if (!threadId || !content) {
-    throw new Error('Faltan campos obligatorios');
+  if (!userRecord || (!userRecord.isMechanic && !userRecord.isAdmin)) {
+    throw new Error('Sólo mecánicos o administradores pueden crear comentarios');
   }
 
+  // Rate Limiting Básico (Evitar Spam)
+  const lastComment = await db.query.forumComments.findFirst({
+    where: eq(forumComments.authorId, discordId),
+    orderBy: [desc(forumComments.createdAt)],
+  });
+
+  if (lastComment && (Date.now() - lastComment.createdAt.getTime()) < 15000) {
+    throw new Error('Estás comentando muy rápido. Esperá 15 segundos.');
+  }
+
+  // Validación Zod
+  const parsed = commentSchema.safeParse({
+    threadId: formData.get('threadId'),
+    content: formData.get('content'),
+    mediaUrl: formData.get('mediaUrl'),
+  });
+
+  if (!parsed.success) {
+    throw new Error(parsed.error.errors[0].message);
+  }
+
+  const { threadId, content, mediaUrl } = parsed.data;
+
+  const newId = randomUUID();
+
   await db.insert(forumComments).values({
-    id: randomUUID(),
+    id: newId,
     threadId,
     authorId: discordId,
     content,
     mediaUrl: mediaUrl || null,
   });
 
-  revalidatePath(`/foro/${threadId}`);
+  revalidatePath('/', 'layout');
+  return { success: true, commentId: newId };
 }
 
 export async function voteForumThread(threadId: string, voteValue: 1 | -1) {

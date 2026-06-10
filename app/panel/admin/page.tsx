@@ -351,38 +351,55 @@ export default async function AdminPage() {
         </div>
       </div>
 
-      {/* Row 4: Rewards Configuration */}
-      <div className="rounded-2xl border border-border bg-card p-6 max-w-2xl">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="flex size-10 items-center justify-center rounded-xl bg-purple-500/10 text-purple-400 ring-1 ring-purple-500/20">
-            <Trophy className="size-5" />
+      {/* Row 4: Rewards Configuration + Forum Moderation */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Rewards Configuration */}
+        <div className="rounded-2xl border border-border bg-card p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="flex size-10 items-center justify-center rounded-xl bg-purple-500/10 text-purple-400 ring-1 ring-purple-500/20">
+              <Trophy className="size-5" />
+            </div>
+            <div>
+              <h3 className="font-heading text-sm font-600 uppercase tracking-wider">Configurar Recompensas</h3>
+              <p className="text-xs text-muted-foreground">Se muestran en el Ranking para los 3 mejores</p>
+            </div>
           </div>
-          <div>
-            <h3 className="font-heading text-sm font-600 uppercase tracking-wider">Configurar Recompensas</h3>
-            <p className="text-xs text-muted-foreground">Se muestran en el Ranking para los 3 mejores</p>
-          </div>
+          <form action={updateRewards} className="space-y-4">
+            <div className="space-y-1.5">
+              <label htmlFor="r1" className="font-heading text-[10px] font-600 uppercase tracking-widest text-yellow-500">Top 1 Recompensa</label>
+              <input type="text" id="r1" name="reward_1" defaultValue={reward1} placeholder="Ej: Bono de $5000"
+                className="flex h-11 w-full rounded-xl border border-input bg-background/50 px-3 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50" />
+            </div>
+            <div className="space-y-1.5">
+              <label htmlFor="r2" className="font-heading text-[10px] font-600 uppercase tracking-widest text-slate-300">Top 2 Recompensa</label>
+              <input type="text" id="r2" name="reward_2" defaultValue={reward2} placeholder="Ej: Bono de $3000"
+                className="flex h-11 w-full rounded-xl border border-input bg-background/50 px-3 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50" />
+            </div>
+            <div className="space-y-1.5">
+              <label htmlFor="r3" className="font-heading text-[10px] font-600 uppercase tracking-widest text-amber-600">Top 3 Recompensa</label>
+              <input type="text" id="r3" name="reward_3" defaultValue={reward3} placeholder="Ej: Bono de $1000"
+                className="flex h-11 w-full rounded-xl border border-input bg-background/50 px-3 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50" />
+            </div>
+            <button type="submit" className="flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-purple-500 px-6 font-heading text-xs font-600 uppercase tracking-wider text-white shadow-lg shadow-purple-500/20 transition-transform hover:scale-[1.02] active:scale-95">
+              <Trophy className="size-4" />
+              Guardar Recompensas
+            </button>
+          </form>
         </div>
-        <form action={updateRewards} className="space-y-4">
-          <div className="space-y-1.5">
-            <label htmlFor="r1" className="font-heading text-[10px] font-600 uppercase tracking-widest text-yellow-500">Top 1 Recompensa</label>
-            <input type="text" id="r1" name="reward_1" defaultValue={reward1} placeholder="Ej: Bono de $5000"
-              className="flex h-11 w-full rounded-xl border border-input bg-background/50 px-3 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50" />
+
+        {/* Forum Moderation */}
+        <div className="rounded-2xl border border-border bg-card p-6 flex flex-col justify-center items-center text-center">
+          <div className="flex size-16 items-center justify-center rounded-2xl bg-indigo-500/10 text-indigo-400 ring-1 ring-indigo-500/20 mb-6">
+            <Shield className="size-8" />
           </div>
-          <div className="space-y-1.5">
-            <label htmlFor="r2" className="font-heading text-[10px] font-600 uppercase tracking-widest text-slate-300">Top 2 Recompensa</label>
-            <input type="text" id="r2" name="reward_2" defaultValue={reward2} placeholder="Ej: Bono de $3000"
-              className="flex h-11 w-full rounded-xl border border-input bg-background/50 px-3 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50" />
-          </div>
-          <div className="space-y-1.5">
-            <label htmlFor="r3" className="font-heading text-[10px] font-600 uppercase tracking-widest text-amber-600">Top 3 Recompensa</label>
-            <input type="text" id="r3" name="reward_3" defaultValue={reward3} placeholder="Ej: Bono de $1000"
-              className="flex h-11 w-full rounded-xl border border-input bg-background/50 px-3 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50" />
-          </div>
-          <button type="submit" className="flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-purple-500 px-6 font-heading text-xs font-600 uppercase tracking-wider text-white shadow-lg shadow-purple-500/20 transition-transform hover:scale-[1.02] active:scale-95">
-            <Trophy className="size-4" />
-            Guardar Recompensas
-          </button>
-        </form>
+          <h3 className="font-heading text-xl font-600 uppercase tracking-wider mb-2">Moderación del Foro</h3>
+          <p className="text-sm text-muted-foreground mb-8 max-w-sm">
+            Administrá los hilos creados por la comunidad, borrá contenido inapropiado o moderá discusiones.
+          </p>
+          <Link href="/panel/admin/foro" className="flex h-12 w-full max-w-xs items-center justify-center gap-2 rounded-xl bg-indigo-600 px-6 font-heading text-sm font-600 uppercase tracking-wider text-white shadow-lg shadow-indigo-600/20 transition-transform hover:scale-[1.02] active:scale-95">
+            Ingresar al Moderador
+          </Link>
+        </div>
       </div>
     </div>
   );
