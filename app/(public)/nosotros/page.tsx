@@ -41,6 +41,10 @@ export default function NosotrosPage() {
           </>
         }
         description="NOS — Nitrous Oxide System, Inc. — es un taller mecánico ubicado en Del Perro Beach, Los Santos. Una marca creada por amigos con un objetivo claro: ofrecer la mejor mecánica y cultura del motor a toda la comunidad."
+        heroImage={{
+          src: '/skyline.png',
+          alt: 'Nissan Skyline GTR Amarillo NOS'
+        }}
       />
 
       <section className="mx-auto max-w-5xl px-6 py-24">

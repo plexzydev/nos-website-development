@@ -52,6 +52,10 @@ export default function TerminosPage() {
           </>
         }
         description="Las reglas que rigen el uso de nuestros servicios y del sistema interno de NOS."
+        heroImage={{
+          src: '/skyline.png',
+          alt: 'Nissan Skyline GTR Amarillo NOS'
+        }}
       />
 
       <section className="mx-auto max-w-3xl px-6 py-20">

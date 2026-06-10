@@ -49,6 +49,10 @@ export default function InformacionPage() {
           </>
         }
         description="Ubicación, contacto, horarios y respuestas a las preguntas más frecuentes sobre el taller NOS."
+        heroImage={{
+          src: '/skyline.png',
+          alt: 'Nissan Skyline GTR Amarillo NOS'
+        }}
       />
 
       <section className="mx-auto max-w-5xl px-6 py-20">

@@ -31,6 +31,10 @@ export default function EquipoPage() {
           </>
         }
         description="Un equipo de mecánicos apasionados que comparten un mismo objetivo: que tu vehículo salga del taller mejor de lo que entró. Estos son los miembros de la familia NOS."
+        heroImage={{
+          src: '/skyline.png',
+          alt: 'Nissan Skyline GTR Amarillo NOS'
+        }}
       />
 
       <section className="mx-auto max-w-5xl px-6 py-24">
