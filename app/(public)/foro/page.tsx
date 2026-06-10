@@ -12,6 +12,8 @@ export const metadata = {
   description: 'Comunidad pública de NOS. Votá los mejores aportes.',
 };
 
+export const dynamic = 'force-dynamic';
+
 export default async function ForoPage() {
   const session = await auth();
   let isMechanic = false;

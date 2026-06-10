@@ -2,12 +2,14 @@
 
 import { useTransition, useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { useRouter } from 'next/navigation';
 import { createForumThread } from '@/lib/db/actions-forum';
 import { ImageUploader } from '@/components/panel/image-uploader';
 import { toast } from 'sonner';
 import { Plus, X, MessageSquarePlus } from 'lucide-react';
 
 export function CreateThreadModal() {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [mounted, setMounted] = useState(false);
@@ -41,8 +43,11 @@ export function CreateThreadModal() {
 
     startTransition(async () => {
       try {
-        await createForumThread(formData);
-        setIsOpen(false);
+        const result = await createForumThread(formData);
+        if (result && result.threadId) {
+          setIsOpen(false);
+          router.push(`/foro/${result.threadId}`);
+        }
       } catch (err: any) {
         toast.error(err.message || 'Ocurrió un error');
       }

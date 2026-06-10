@@ -36,7 +36,7 @@ export async function createForumThread(formData: FormData) {
   });
 
   revalidatePath('/foro');
-  redirect(`/foro/${newId}`);
+  return { success: true, threadId: newId };
 }
 
 export async function createForumComment(formData: FormData) {
