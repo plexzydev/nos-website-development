@@ -14,20 +14,9 @@ export default async function AdminUserPage({ params }: { params: Promise<{ user
   const session = await auth();
   const discordId = session!.user!.id!;
 
-  // Verify admin
-  let isAdmin = false;
-  try {
-    const res = await fetch(`https://discord.com/api/v10/guilds/${process.env.DISCORD_GUILD_ID}/members/${discordId}`, {
-      headers: { Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}` },
-      next: { revalidate: 60 }
-    });
-    if (res.ok) {
-      const member = await res.json();
-      isAdmin = member.roles.includes(ADMIN_ROLE_ID);
-    }
-  } catch {}
-
-  if (!isAdmin) notFound();
+  // Verify admin from DB (synced by layout)
+  const adminRecord = await db.query.users.findFirst({ where: eq(users.id, discordId) });
+  if (!adminRecord?.isAdmin) notFound();
 
   const mechanic = await db.query.users.findFirst({ where: eq(users.id, userId) });
   if (!mechanic) notFound();
