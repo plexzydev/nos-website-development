@@ -10,10 +10,12 @@ import { auth } from '@/auth';
 import { CommentForm } from '@/components/foro/comment-form';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
+import { unstable_noStore as noStore } from 'next/cache';
 
 export const dynamic = 'force-dynamic';
 
 export default async function ThreadDetailPage({ params }: { params: { id: string } }) {
+  noStore();
   const session = await auth();
   let isMechanic = false;
 

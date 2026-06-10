@@ -35,7 +35,7 @@ export async function createForumThread(formData: FormData) {
     mediaUrl: mediaUrl || null,
   });
 
-  revalidatePath('/foro');
+  revalidatePath('/', 'layout');
   return { success: true, threadId: newId };
 }
 

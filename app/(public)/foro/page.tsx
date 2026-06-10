@@ -7,6 +7,8 @@ import { CreateThreadModal } from '@/components/foro/create-thread-modal';
 import { PageHero } from '@/components/page-hero';
 import { auth } from '@/auth';
 
+import { unstable_noStore as noStore } from 'next/cache';
+
 export const metadata = {
   title: 'Foro NOS | Nitrous Oxide System',
   description: 'Comunidad pública de NOS. Votá los mejores aportes.',
@@ -15,6 +17,7 @@ export const metadata = {
 export const dynamic = 'force-dynamic';
 
 export default async function ForoPage() {
+  noStore();
   const session = await auth();
   let isMechanic = false;
 

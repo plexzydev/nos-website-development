@@ -5,12 +5,16 @@ import { desc, eq } from 'drizzle-orm';
 import { redirect } from 'next/navigation';
 import { AdminDeleteThreadButton } from './delete-button';
 import Link from 'next/link';
+import { unstable_noStore as noStore } from 'next/cache';
 
 export const metadata = {
   title: 'Moderación del Foro | Admin NOS',
 };
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminForoPage() {
+  noStore();
   const session = await auth();
   if (!session?.user?.id) redirect('/');
 
