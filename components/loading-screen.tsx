@@ -9,7 +9,7 @@ export function LoadingScreen() {
   const rightCurtainRef = useRef<HTMLDivElement>(null);
   const bottleRef = useRef<SVGSVGElement>(null);
   const fillRectRef = useRef<SVGRectElement>(null);
-  const textRef = useRef<HTMLHeadingElement>(null);
+  const textRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // We want to animate:
@@ -142,22 +142,13 @@ export function LoadingScreen() {
             clipPath="url(#bottle-fill-clip)" 
           />
 
-          {/* NOS Label inside the bottle (only visible when filled) */}
-          <g clipPath="url(#bottle-fill-clip)">
-            <rect x="60" y="140" width="80" height="40" fill="#FFD700" transform="rotate(-15, 100, 160)" />
-            <text x="100" y="165" fontFamily="Arial, sans-serif" fontWeight="900" fontSize="24" fill="#111" textAnchor="middle" transform="rotate(-15, 100, 160)">NOS</text>
-          </g>
-
           {/* Shine / Reflection highlight on the bottle */}
           <path d="M 65 100 L 65 280" stroke="rgba(255,255,255,0.4)" strokeWidth="6" strokeLinecap="round" />
         </svg>
 
-        <h1 
-          ref={textRef}
-          className="mt-8 font-heading text-4xl sm:text-6xl font-900 uppercase tracking-tighter text-[#111] drop-shadow-sm text-center px-4"
-        >
-          Bienvenido a NOS
-        </h1>
+        <div ref={textRef} className="mt-8 px-4 flex justify-center">
+          <img src="/nos-logo.png" alt="NOS Logo" className="w-48 sm:w-64 h-auto drop-shadow-lg" />
+        </div>
         
       </div>
     </div>
