@@ -1,14 +1,17 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
-import { writeFile } from 'fs/promises';
-import { join } from 'path';
 import { randomUUID } from 'crypto';
-import fs from 'fs';
 
 export async function POST(req: Request) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+  }
+
+  const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
+  if (!webhookUrl) {
+    console.error('Falta la variable de entorno DISCORD_WEBHOOK_URL');
+    return NextResponse.json({ error: 'Sistema de subida no configurado' }, { status: 500 });
   }
 
   try {
@@ -22,20 +25,40 @@ export async function POST(req: Request) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Get the extension
+    // Get the extension and generate unique filename
     const ext = file.name.split('.').pop() || 'png';
     const filename = `${randomUUID()}.${ext}`;
-    
-    // Create uploads directory if it doesn't exist
-    const uploadDir = join(process.cwd(), 'public', 'uploads');
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
+
+    // Prepare FormData for Discord Webhook
+    const discordFormData = new FormData();
+    const blob = new Blob([buffer], { type: file.type });
+    discordFormData.append('file', blob, filename);
+
+    // We must append ?wait=true to the webhook URL to get the message data back
+    const urlWithWait = new URL(webhookUrl);
+    urlWithWait.searchParams.set('wait', 'true');
+
+    const response = await fetch(urlWithWait.toString(), {
+      method: 'POST',
+      body: discordFormData,
+    });
+
+    if (!response.ok) {
+      console.error('Error de Discord:', await response.text());
+      throw new Error('No se pudo subir a Discord');
     }
 
-    const path = join(uploadDir, filename);
-    await writeFile(path, buffer);
+    const discordMessage = await response.json();
+    
+    // Extract the attachment URL from the Discord response
+    if (!discordMessage.attachments || discordMessage.attachments.length === 0) {
+      throw new Error('Discord no devolvió el archivo adjunto');
+    }
 
-    return NextResponse.json({ url: `/uploads/${filename}` });
+    const imageUrl = discordMessage.attachments[0].url;
+
+    // Return the Discord CDN url to the frontend
+    return NextResponse.json({ url: imageUrl });
   } catch (e) {
     console.error('Error uploading file:', e);
     return NextResponse.json({ error: 'Error al subir archivo' }, { status: 500 });
