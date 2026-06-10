@@ -44,7 +44,7 @@ export function PageHero({
     <section ref={root} className="relative overflow-hidden border-b border-border bg-grid">
       <div className="pointer-events-none absolute right-[-10%] top-1/2 hidden h-[140%] w-[40%] -translate-y-1/2 -skew-x-12 overflow-hidden bg-primary/[0.04] md:block xl:right-[-5%] xl:w-[35%] z-0">
         {heroImage && (
-          <div data-hero-car className="absolute left-[-55%] top-[70%] w-[170%] -translate-y-1/2 skew-x-12 select-none xl:left-[-40%] xl:w-[150%]">
+          <div data-hero-car className="absolute left-[-65%] top-[62%] w-[140%] -translate-y-1/2 skew-x-12 select-none xl:left-[-50%] xl:w-[125%]">
             <Image
               src={heroImage.src}
               alt={heroImage.alt}
