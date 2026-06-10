@@ -19,7 +19,7 @@ export function PageHero({
     <section className="relative overflow-hidden border-b border-border bg-grid">
       <div className="pointer-events-none absolute -right-16 top-1/2 hidden h-[140%] w-[45%] -translate-y-1/2 -skew-x-12 overflow-hidden bg-primary/[0.04] md:block">
         {heroImage && (
-          <div className="absolute left-[-20%] top-[70%] w-[140%] -translate-y-1/2 skew-x-12 select-none xl:left-[-10%] xl:w-[120%]">
+          <div className="absolute left-[-25%] top-[70%] w-[140%] -translate-y-1/2 skew-x-12 select-none xl:left-[-15%] xl:w-[120%]">
             <Image
               src={heroImage.src}
               alt={heroImage.alt}
