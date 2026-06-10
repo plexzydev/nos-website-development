@@ -146,7 +146,7 @@ export function LoadingScreen() {
           <path d="M 65 100 L 65 280" stroke="rgba(255,255,255,0.4)" strokeWidth="6" strokeLinecap="round" />
         </svg>
 
-        <div ref={textRef} className="mt-8 px-4 flex justify-center">
+        <div ref={textRef} className="mt-1 px-4 flex justify-center">
           <img src="/nos-logo.png" alt="NOS Logo" className="w-48 sm:w-64 h-auto drop-shadow-lg" />
         </div>
         
