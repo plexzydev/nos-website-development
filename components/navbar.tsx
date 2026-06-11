@@ -93,7 +93,7 @@ export function Navbar({ user }: { user?: { name?: string | null, image?: string
             </Link>
           ) : (
             <Link
-              href="/panel"
+              href="/api/auth/signin"
               className="hidden items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-transform hover:scale-[1.03] active:scale-95 sm:flex"
             >
               <Wrench className="size-4" />
