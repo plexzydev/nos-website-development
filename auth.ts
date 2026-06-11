@@ -4,9 +4,6 @@ import { db } from "@/lib/db"
 import { users } from "@/lib/db/schema"
 import { eq } from "drizzle-orm"
 
-const MECHANIC_ROLE_ID = '1478275468666077205';
-const ADMIN_ROLE_ID = '1478286207447339060';
-
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     Discord({
@@ -30,58 +27,24 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }
   },
   events: {
-    async signIn({ user, account, profile }) {
+    async signIn({ user, profile }) {
       if (profile && profile.id) {
         try {
-          // Get member data from Discord to check roles
-          let isMechanic = false;
-          let isAdmin = false;
-          const nickname = (profile.global_name || profile.username || '') as string;
-
-          try {
-            const res = await fetch(`https://discord.com/api/v10/guilds/${process.env.DISCORD_GUILD_ID}/members/${profile.id}`, {
-              headers: { Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}` },
-            });
-
-            if (res.ok) {
-              const member = await res.json();
-              const roleIds = Array.isArray(member?.roles)
-                ? member.roles.map((r: any) => String(r))
-                : [];
-              isMechanic = roleIds.includes(MECHANIC_ROLE_ID);
-              isAdmin = roleIds.includes(ADMIN_ROLE_ID);
-            }
-          } catch (err) {
-            console.error("Failed to fetch Discord member roles:", err);
-          }
-
-          // Upsert user (insert if not exists, update if exists)
+          // Solo sincronizar el avatar si el usuario ya existe en la DB (fue linkeado por el bot)
           const existingUser = await db.query.users.findFirst({
             where: eq(users.id, profile.id as string)
           });
 
-          const avatarUrl = (profile.image_url as string) || (user.image as string) || null;
-
           if (existingUser) {
+            const avatarUrl = (profile.image_url as string) || (user.image as string) || null;
             await db.update(users)
-              .set({
-                avatarUrl,
-                isMechanic,
-                isAdmin,
-                nickname
-              })
+              .set({ avatarUrl })
               .where(eq(users.id, profile.id as string));
-          } else {
-            await db.insert(users).values({
-              id: profile.id as string,
-              avatarUrl,
-              isMechanic,
-              isAdmin,
-              nickname
-            });
           }
+          // Si el usuario NO existe en la DB, no hacemos nada.
+          // El usuario debe usar /linkaccount en Discord primero.
         } catch (e) {
-          console.error("Failed to sync user data:", e);
+          console.error("Failed to sync avatar:", e);
         }
       }
     }

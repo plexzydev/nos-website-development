@@ -69,83 +69,43 @@ export default async function PanelLayout({ children }: { children: React.ReactN
     );
   }
 
-  // 2. Verify roles in Discord (with retry logic and fallback to DB)
+  // 2. Verify roles via Discord API and sync to DB
   let hasRole = userRecord.isMechanic || false;
   let isAdmin = userRecord.isAdmin || false;
   
-  const fetchDiscordRoles = async (maxRetries = 2) => {
-    for (let attempt = 0; attempt < maxRetries; attempt++) {
-      try {
-        const res = await fetch(`https://discord.com/api/v10/guilds/${process.env.DISCORD_GUILD_ID}/members/${discordId}`, {
-          headers: { Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}` },
-          next: { revalidate: 0 }
-        });
+  try {
+    const res = await fetch(`https://discord.com/api/v10/guilds/${process.env.DISCORD_GUILD_ID}/members/${discordId}`, {
+      headers: { Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}` },
+      next: { revalidate: 0 }
+    });
 
-        if (res.ok) {
-          const member = await res.json();
-          const roleIds = member?.roles || [];
-          
-          // Check roles - both as string and number comparison
-          const mechanicCheck = roleIds.some((r: any) => 
-            String(r) === MECHANIC_ROLE_ID || r === MECHANIC_ROLE_ID
-          );
-          const adminCheck = roleIds.some((r: any) => 
-            String(r) === ADMIN_ROLE_ID || r === ADMIN_ROLE_ID
-          );
-          
-          console.log(`[Panel] Discord roles for ${discordId}:`, {
-            roles: roleIds,
-            mechanicCheck,
-            adminCheck,
-            MECHANIC_ROLE_ID,
-            ADMIN_ROLE_ID
-          });
-          
-          return {
-            hasRole: mechanicCheck,
-            isAdmin: adminCheck,
-            nickname: member.nick || member.user?.global_name || member.user?.username,
-            success: true
-          };
-        } else if (res.status === 404) {
-          console.log(`[Panel] Member ${discordId} not found in guild`);
-          return { hasRole: false, isAdmin: false, nickname: null, success: false };
-        } else {
-          console.warn(`[Panel] Discord API returned ${res.status}`);
-        }
-      } catch (error) {
-        console.error(`[Panel] Attempt ${attempt + 1} to fetch Discord roles failed:`, error);
-        if (attempt < maxRetries - 1) {
-          await new Promise(r => setTimeout(r, 500));
-        }
+    if (res.ok) {
+      const member = await res.json();
+      const roleIds: string[] = Array.isArray(member?.roles)
+        ? member.roles.map((r: any) => String(r))
+        : [];
+
+      hasRole = roleIds.includes(MECHANIC_ROLE_ID);
+      isAdmin = roleIds.includes(ADMIN_ROLE_ID);
+
+      const currentNickname = member.nick || member.user?.global_name || member.user?.username;
+
+      // Sync roles and nickname to DB if they changed
+      if (
+        hasRole !== userRecord.isMechanic ||
+        isAdmin !== userRecord.isAdmin ||
+        currentNickname !== userRecord.nickname
+      ) {
+        await db.update(users)
+          .set({ isMechanic: hasRole, isAdmin, nickname: currentNickname })
+          .where(eq(users.id, discordId));
+        userRecord.nickname = currentNickname;
       }
+    } else {
+      console.warn(`Discord API returned ${res.status} when checking member roles, using DB fallback`);
     }
-    return null;
-  };
-
-  const discordRoles = await fetchDiscordRoles();
-  
-  console.log(`[Panel] Discord roles result for ${discordId}:`, discordRoles);
-  console.log(`[Panel] DB values for ${discordId}:`, { isMechanic: userRecord.isMechanic, isAdmin: userRecord.isAdmin });
-  
-  if (discordRoles && discordRoles.success) {
-    hasRole = discordRoles.hasRole;
-    isAdmin = discordRoles.isAdmin;
-    
-    const currentNickname = discordRoles.nickname;
-
-    // Sync to DB
-    if (hasRole !== userRecord.isMechanic || isAdmin !== userRecord.isAdmin || currentNickname !== userRecord.nickname) {
-      console.log(`[Panel] Syncing roles to DB for ${discordId}:`, { hasRole, isAdmin, currentNickname });
-      await db.update(users).set({ isMechanic: hasRole, isAdmin, nickname: currentNickname }).where(eq(users.id, discordId));
-      userRecord.nickname = currentNickname;
-    }
-  } else if (discordRoles && !discordRoles.success) {
-    hasRole = false;
-    isAdmin = false;
-    console.log(`[Panel] Member not in guild, setting roles to false`);
-  } else {
-    console.warn(`[Panel] All Discord API calls failed for ${discordId}, using DB fallback. DB values: isMechanic=${userRecord.isMechanic}, isAdmin=${userRecord.isAdmin}`);
+  } catch (error) {
+    console.error("Error fetching discord member roles, using DB fallback:", error);
   }
 
   // If no role at all, deny access

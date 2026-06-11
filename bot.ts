@@ -143,6 +143,9 @@ client.on('ready', async () => {
   checkScheduledActivities();
 });
 
+const MECHANIC_ROLE_ID = '1478275468666077205';
+const ADMIN_ROLE_ID = '1478286207447339060';
+
 client.on('interactionCreate', async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
@@ -159,6 +162,21 @@ client.on('interactionCreate', async (interaction) => {
     try {
       await interaction.deferReply({ ephemeral: true });
 
+      // ─── Verificar roles del usuario en el servidor ───
+      // @ts-ignore
+      const memberRoles: string[] = interaction.member?.roles?.cache
+        // @ts-ignore
+        ? Array.from(interaction.member.roles.cache.keys())
+        // @ts-ignore
+        : (Array.isArray(interaction.member?.roles) ? interaction.member.roles.map((r: any) => String(r)) : []);
+
+      const hasMechanicRole = memberRoles.includes(MECHANIC_ROLE_ID);
+      const hasAdminRole = memberRoles.includes(ADMIN_ROLE_ID);
+
+      if (!hasMechanicRole && !hasAdminRole) {
+        return interaction.editReply('❌ No tenés el rol de **Mecánico** en este servidor. Solo los mecánicos pueden linkear su cuenta al panel.');
+      }
+
       // Comprobar si el hash ya está en uso por OTRO usuario
       const existingUser = await db.select().from(users).where(and(eq(users.userHash, hashArg), ne(users.id, discordId)));
       if (existingUser.length > 0) {
@@ -169,13 +187,20 @@ client.on('interactionCreate', async (interaction) => {
         id: discordId,
         nickname: nickname,
         userHash: hashArg,
-        isMechanic: false
+        isMechanic: hasMechanicRole,
+        isAdmin: hasAdminRole,
       }).onConflictDoUpdate({
         target: users.id,
-        set: { nickname: nickname, userHash: hashArg }
+        set: {
+          nickname: nickname,
+          userHash: hashArg,
+          isMechanic: hasMechanicRole,
+          isAdmin: hasAdminRole,
+        }
       });
 
-      await interaction.editReply(`✅ ¡Cuenta linkeada exitosamente! Hola, **${nickname}** (**${hashArg}**). Tu ID (${discordId}) ha sido guardado. Ahora puedes ingresar al panel en la web.`);
+      const roleText = hasAdminRole ? 'Mecánico + Administrador' : 'Mecánico';
+      await interaction.editReply(`✅ ¡Cuenta linkeada exitosamente! Hola, **${nickname}** (**${hashArg}**). Tu ID (${discordId}) ha sido guardado como **${roleText}**. Ahora podés ingresar al panel en la web.`);
     } catch (error) {
       console.error("Error guardando en la DB:", error);
       await interaction.editReply('Hubo un error al guardar tu cuenta en la base de datos.');
