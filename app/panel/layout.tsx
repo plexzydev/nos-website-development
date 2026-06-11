@@ -83,32 +83,50 @@ export default async function PanelLayout({ children }: { children: React.ReactN
 
         if (res.ok) {
           const member = await res.json();
-          const roleIds = Array.isArray(member?.roles)
-            ? member.roles.map((r: any) => String(r))
-            : [];
+          const roleIds = member?.roles || [];
+          
+          // Check roles - both as string and number comparison
+          const mechanicCheck = roleIds.some((r: any) => 
+            String(r) === MECHANIC_ROLE_ID || r === MECHANIC_ROLE_ID
+          );
+          const adminCheck = roleIds.some((r: any) => 
+            String(r) === ADMIN_ROLE_ID || r === ADMIN_ROLE_ID
+          );
+          
+          console.log(`[Panel] Discord roles for ${discordId}:`, {
+            roles: roleIds,
+            mechanicCheck,
+            adminCheck,
+            MECHANIC_ROLE_ID,
+            ADMIN_ROLE_ID
+          });
+          
           return {
-            hasRole: roleIds.includes(MECHANIC_ROLE_ID),
-            isAdmin: roleIds.includes(ADMIN_ROLE_ID),
+            hasRole: mechanicCheck,
+            isAdmin: adminCheck,
             nickname: member.nick || member.user?.global_name || member.user?.username,
             success: true
           };
         } else if (res.status === 404) {
-          // Member not found in guild - they may have been removed
+          console.log(`[Panel] Member ${discordId} not found in guild`);
           return { hasRole: false, isAdmin: false, nickname: null, success: false };
+        } else {
+          console.warn(`[Panel] Discord API returned ${res.status}`);
         }
-        // For other errors, retry
       } catch (error) {
-        console.error(`Attempt ${attempt + 1} to fetch Discord roles failed:`, error);
+        console.error(`[Panel] Attempt ${attempt + 1} to fetch Discord roles failed:`, error);
         if (attempt < maxRetries - 1) {
-          // Wait before retrying
           await new Promise(r => setTimeout(r, 500));
         }
       }
     }
-    return null; // All retries failed
+    return null;
   };
 
   const discordRoles = await fetchDiscordRoles();
+  
+  console.log(`[Panel] Discord roles result for ${discordId}:`, discordRoles);
+  console.log(`[Panel] DB values for ${discordId}:`, { isMechanic: userRecord.isMechanic, isAdmin: userRecord.isAdmin });
   
   if (discordRoles && discordRoles.success) {
     hasRole = discordRoles.hasRole;
@@ -118,17 +136,16 @@ export default async function PanelLayout({ children }: { children: React.ReactN
 
     // Sync to DB
     if (hasRole !== userRecord.isMechanic || isAdmin !== userRecord.isAdmin || currentNickname !== userRecord.nickname) {
+      console.log(`[Panel] Syncing roles to DB for ${discordId}:`, { hasRole, isAdmin, currentNickname });
       await db.update(users).set({ isMechanic: hasRole, isAdmin, nickname: currentNickname }).where(eq(users.id, discordId));
       userRecord.nickname = currentNickname;
     }
   } else if (discordRoles && !discordRoles.success) {
-    // Discord API call succeeded but member not found - they're not in the guild
     hasRole = false;
     isAdmin = false;
+    console.log(`[Panel] Member not in guild, setting roles to false`);
   } else {
-    // Discord API calls failed - use DB as fallback but warn about potential staleness
-    console.warn(`All attempts to fetch Discord roles failed for ${discordId}, using DB fallback`);
-    // In this case, keep using userRecord.isMechanic and userRecord.isAdmin
+    console.warn(`[Panel] All Discord API calls failed for ${discordId}, using DB fallback. DB values: isMechanic=${userRecord.isMechanic}, isAdmin=${userRecord.isAdmin}`);
   }
 
   // If no role at all, deny access
