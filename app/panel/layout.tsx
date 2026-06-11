@@ -83,10 +83,13 @@ export default async function PanelLayout({ children }: { children: React.ReactN
 
         if (res.ok) {
           const member = await res.json();
+          const roleIds = Array.isArray(member?.roles)
+            ? member.roles.map((r: any) => String(r))
+            : [];
           return {
-            hasRole: member.roles.includes(MECHANIC_ROLE_ID),
-            isAdmin: member.roles.includes(ADMIN_ROLE_ID),
-            nickname: member.nick || member.user.global_name || member.user.username,
+            hasRole: roleIds.includes(MECHANIC_ROLE_ID),
+            isAdmin: roleIds.includes(ADMIN_ROLE_ID),
+            nickname: member.nick || member.user?.global_name || member.user?.username,
             success: true
           };
         } else if (res.status === 404) {

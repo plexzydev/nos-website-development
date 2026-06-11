@@ -36,7 +36,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           // Get member data from Discord to check roles
           let isMechanic = false;
           let isAdmin = false;
-          const nickname = profile.global_name || profile.username;
+          const nickname = (profile.global_name || profile.username || '') as string;
 
           try {
             const res = await fetch(`https://discord.com/api/v10/guilds/${process.env.DISCORD_GUILD_ID}/members/${profile.id}`, {
@@ -45,8 +45,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
             if (res.ok) {
               const member = await res.json();
-              isMechanic = member.roles.includes(MECHANIC_ROLE_ID);
-              isAdmin = member.roles.includes(ADMIN_ROLE_ID);
+              const roleIds = Array.isArray(member?.roles)
+                ? member.roles.map((r: any) => String(r))
+                : [];
+              isMechanic = roleIds.includes(MECHANIC_ROLE_ID);
+              isAdmin = roleIds.includes(ADMIN_ROLE_ID);
             }
           } catch (err) {
             console.error("Failed to fetch Discord member roles:", err);
@@ -57,10 +60,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             where: eq(users.id, profile.id as string)
           });
 
+          const avatarUrl = (profile.image_url as string) || (user.image as string) || null;
+
           if (existingUser) {
             await db.update(users)
               .set({
-                avatarUrl: profile.image_url as string || user.image,
+                avatarUrl,
                 isMechanic,
                 isAdmin,
                 nickname
@@ -69,7 +74,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           } else {
             await db.insert(users).values({
               id: profile.id as string,
-              avatarUrl: profile.image_url as string || user.image,
+              avatarUrl,
               isMechanic,
               isAdmin,
               nickname
